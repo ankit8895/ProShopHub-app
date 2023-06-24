@@ -1,10 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-export const addToCart = createAsyncThunk('addToCart', async (id) => {
-  return await axios
-    .get(`/api/products/${id}`)
-    .then((response) => response.data);
+export const addToCart = createAsyncThunk('addToCart', async (productData) => {
+  const { id, qty } = cartData;
+  const response = await axios.get(`/api/products/${id}`);
+  const data = response.data;
+
+  return {
+    product: data._id,
+    name: data.name,
+    image: data.image,
+    price: data.price,
+    countInStock: data.countInStock,
+    qty,
+  };
 });
 
 const initialState = {
