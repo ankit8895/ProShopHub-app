@@ -12,6 +12,7 @@ import {
 } from 'react-bootstrap';
 import Message from '../components/Message';
 import { addToCart } from '../redux/reducers/cartReducers';
+import { actions } from '../redux/reducers/cartReducers';
 
 const CartPage = () => {
   const { id } = useParams();
@@ -32,7 +33,9 @@ const CartPage = () => {
     }
   }, [dispatch, id, qty]);
 
-  const removeFromCartHandler = (id) => {};
+  const removeFromCartHandler = (id) => {
+    dispatch(actions.removeFromCart(id));
+  };
   const checkOutHandler = () => {
     navigate('/login?redirect=shipping');
   };
