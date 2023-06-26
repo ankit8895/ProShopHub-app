@@ -31,6 +31,7 @@ const userLoginSlice = createSlice({
   reducers: {
     userLogout: (state, action) => {
       state.userInfo = null;
+      localStorage.removeItem('userInfo');
     },
   },
   extraReducers: (builder) => {
@@ -53,3 +54,4 @@ const userLoginSlice = createSlice({
 });
 
 export const userLoginReducer = userLoginSlice.reducer;
+export const actions = userLoginSlice.actions;
