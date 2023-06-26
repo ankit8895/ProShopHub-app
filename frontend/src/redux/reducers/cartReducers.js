@@ -56,7 +56,7 @@ const cartSlice = createSlice({
         state.cartItems = [...state.cartItems, item];
       }
     });
-    builder.addCase(addToCart, (state, action) => {
+    builder.addCase(addToCart.rejected, (state, action) => {
       state.loading = false;
       state.error =
         action.error.response && action.error.response.data.message
