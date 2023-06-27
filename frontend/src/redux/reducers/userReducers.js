@@ -151,3 +151,52 @@ const userDetailsSlice = createSlice({
 });
 
 export const userDetailsReducer = userDetailsSlice.reducer;
+
+export const updateUserProfile = createAsyncThunk(
+  'user/register',
+  async (user, { getState }) => {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.put(`/api/users/profile`, user, config);
+
+    return data;
+  }
+);
+
+const userUpdateProfileSlice = createSlice({
+  name: 'userUpdateProfile',
+  initialState: {
+    loading: false,
+    userInfo: {},
+    error: '',
+    success: false,
+  },
+  extraReducers: (builder) => {
+    builder.addCase(updateUserProfile.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(updateUserProfile.fulfilled, (state, action) => {
+      state.loading = false;
+      state.userInfo = action.payload;
+      state.success = true;
+    });
+    builder.addCase(updateUserProfile.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
+});
+
+export const userUpdateProfileReducer = userUpdateProfileSlice.reducer;
