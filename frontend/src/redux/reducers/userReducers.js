@@ -104,3 +104,50 @@ const userRegisterSlice = createSlice({
 });
 
 export const userRegisterReducer = userRegisterSlice.reducer;
+
+export const getUserDetails = createAsyncThunk(
+  'user/register',
+  async (id, { getState }) => {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.get(`/api/users/${id}`, config);
+
+    return data;
+  }
+);
+
+const userDetailsSlice = createSlice({
+  name: 'userDetails',
+  initialState: {
+    loading: false,
+    user: {},
+    error: '',
+  },
+  extraReducers: (builder) => {
+    builder.addCase(getUserDetails.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(getUserDetails.fulfilled, (state, action) => {
+      state.loading = false;
+      state.user = action.payload;
+    });
+    builder.addCase(getUserDetails.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
+});
+
+export const userDetailsReducer = userDetailsSlice.reducer;
