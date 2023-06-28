@@ -28,6 +28,7 @@ const initialState = {
   loading: false,
   cartItems: [],
   shippingAddress: {},
+  paymentMethod: '',
   error: '',
 };
 
@@ -42,6 +43,10 @@ const cartSlice = createSlice({
     saveShippingAddress: (state, action) => {
       state.shippingAddress = action.payload;
       localStorage.setItem('shippingAddress', JSON.stringify(action.payload));
+    },
+    savePaymentMethod: (state, action) => {
+      state.paymentMethod = action.payload;
+      localStorage.setItem('paymentMethod', JSON.stringify(action.payload));
     },
   },
   extraReducers: (builder) => {
