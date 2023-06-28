@@ -27,6 +27,7 @@ export const addToCart = createAsyncThunk(
 const initialState = {
   loading: false,
   cartItems: [],
+  shippingAddress: {},
   error: '',
 };
 
@@ -37,6 +38,10 @@ const cartSlice = createSlice({
     removeFromCart: (state, action) => {
       state.cartItems.splice(action.payload, 1);
       localStorage.setItem('cartItems', JSON.stringify(state.cartItems));
+    },
+    saveShippingAddress: (state, action) => {
+      state.shippingAddress = action.payload;
+      localStorage.setItem('shippingAddress', JSON.stringify(action.payload));
     },
   },
   extraReducers: (builder) => {

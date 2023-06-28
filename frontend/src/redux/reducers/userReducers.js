@@ -106,7 +106,7 @@ const userRegisterSlice = createSlice({
 export const userRegisterReducer = userRegisterSlice.reducer;
 
 export const getUserDetails = createAsyncThunk(
-  'user/register',
+  'getUserDetails',
   async (id, { getState }) => {
     const {
       userLogin: { userInfo },
@@ -153,7 +153,7 @@ const userDetailsSlice = createSlice({
 export const userDetailsReducer = userDetailsSlice.reducer;
 
 export const updateUserProfile = createAsyncThunk(
-  'user/register',
+  'UpdateUserDetails',
   async (user, { getState }) => {
     const {
       userLogin: { userInfo },
