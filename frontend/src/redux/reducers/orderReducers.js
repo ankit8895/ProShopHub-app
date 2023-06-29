@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { actions } from './cartReducers';
 
 export const createOrder = createAsyncThunk(
   'order/createOrder',
@@ -49,3 +50,53 @@ const orderCreateSlice = createSlice({
 });
 
 export const orderCreateReducer = orderCreateSlice.reducer;
+
+export const getOrderDetails = createAsyncThunk(
+  'order/orderDetails',
+  async (order, { getState }) => {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.get(`/api/orders/${id}`, config);
+
+    return data;
+  }
+);
+
+const orderDetailsSlice = createSlice({
+  name: 'orderDetails',
+  initialState: {
+    loading: false,
+    orderItems: [],
+    shippingAddress: {},
+    error: '',
+  },
+  extraReducers: (builder) => {
+    builder.addCase(getOrderDetails.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(getOrderDetails.fulfilled, (state, action) => {
+      const { orderItems, shippingAddress } = action.payload;
+      state.loading = false;
+      state.orderItems = orderItems;
+      state.shippingAddress = shippingAddress;
+    });
+    builder.addCase(getOrderDetails.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
+});
+
+export const orderDetailsReducer = orderDetailsSlice.reducer;
