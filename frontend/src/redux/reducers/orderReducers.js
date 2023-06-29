@@ -16,7 +16,6 @@ export const createOrder = createAsyncThunk(
     };
 
     const { data } = await axios.post(`/api/orders`, order, config);
-    console.log('INSIDE CREATEORDER', data);
 
     return data;
   }
