@@ -47,7 +47,7 @@ const orderSchema = mongoose.Schema(
       },
     },
     paymentMethod: {
-      type: Boolean,
+      type: String,
       required: true,
     },
     paymentResult: {
