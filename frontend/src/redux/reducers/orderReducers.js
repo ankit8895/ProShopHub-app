@@ -96,3 +96,39 @@ const orderDetailsSlice = createSlice({
 });
 
 export const orderDetailsReducer = orderDetailsSlice.reducer;
+
+export const payOrder = createAsyncThunk(
+  'order/payOrder',
+  async (orderInfo, { getState }) => {
+    const { orderId, paymentResult } = orderInfo;
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.put(
+      `/api/orders/${orderId}/pay`,
+      paymentResult,
+      config
+    );
+
+    return data;
+  }
+);
+
+const orderPaySlice = createSlice({
+  name: 'orderPay',
+  initialState: {
+    loading: false,
+    success: false,
+    error: '',
+  },
+});
+
+export const orderPayReducer = orderPaySlice.reducer;
