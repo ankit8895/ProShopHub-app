@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { actions } from './cartReducers';
 
 export const createOrder = createAsyncThunk(
   'order/createOrder',
@@ -53,7 +52,7 @@ export const orderCreateReducer = orderCreateSlice.reducer;
 
 export const getOrderDetails = createAsyncThunk(
   'order/orderDetails',
-  async (order, { getState }) => {
+  async (id, { getState }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -74,9 +73,8 @@ export const getOrderDetails = createAsyncThunk(
 const orderDetailsSlice = createSlice({
   name: 'orderDetails',
   initialState: {
-    loading: false,
-    orderItems: [],
-    shippingAddress: {},
+    loading: true,
+    order: {},
     error: '',
   },
   extraReducers: (builder) => {
@@ -84,10 +82,8 @@ const orderDetailsSlice = createSlice({
       state.loading = true;
     });
     builder.addCase(getOrderDetails.fulfilled, (state, action) => {
-      const { orderItems, shippingAddress } = action.payload;
       state.loading = false;
-      state.orderItems = orderItems;
-      state.shippingAddress = shippingAddress;
+      state.order = action.payload;
     });
     builder.addCase(getOrderDetails.rejected, (state, action) => {
       state.loading = false;
