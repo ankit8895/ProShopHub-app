@@ -22,6 +22,13 @@ app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 
+app.get('/api/config/googlepay', (req, res) =>
+  res.send({
+    gatewayMerchantId: process.env.GOOGLEPAY_GATEWAY_MERCHANT_ID,
+    merchantId: process.env.GOOGLEPAY_MERCHANT_ID,
+  })
+);
+
 app.use(notFound);
 
 app.use(errorHandler);

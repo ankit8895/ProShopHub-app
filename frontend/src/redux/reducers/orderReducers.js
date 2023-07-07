@@ -59,7 +59,6 @@ export const getOrderDetails = createAsyncThunk(
 
     const config = {
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
@@ -100,7 +99,7 @@ export const orderDetailsReducer = orderDetailsSlice.reducer;
 export const payOrder = createAsyncThunk(
   'order/payOrder',
   async (orderInfo, { getState }) => {
-    const { orderId, paymentResult } = orderInfo;
+    const { id, paymentResult } = orderInfo;
     const {
       userLogin: { userInfo },
     } = getState();
@@ -113,7 +112,7 @@ export const payOrder = createAsyncThunk(
     };
 
     const { data } = await axios.put(
-      `/api/orders/${orderId}/pay`,
+      `/api/orders/${id}/pay`,
       paymentResult,
       config
     );
@@ -129,6 +128,32 @@ const orderPaySlice = createSlice({
     success: false,
     error: '',
   },
+  reducers: {
+    payOrderReset: (state, action) => {
+      state.loading = false;
+      state.success = false;
+      state.error = '';
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(payOrder.pending, (state) => {
+      state.loading = true;
+      state.success = false;
+    });
+    builder.addCase(payOrder.fulfilled, (state, action) => {
+      state.loading = false;
+      state.success = true;
+    });
+    builder.addCase(payOrder.rejected, (state, action) => {
+      state.loading = false;
+      state.success = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
 });
 
 export const orderPayReducer = orderPaySlice.reducer;
+export const actions = orderPaySlice.actions;

@@ -1,10 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import GooglePayButton from '@google-pay/button-react';
 import { Link, useParams } from 'react-router-dom';
 import { Row, Col, ListGroup, Image, Card } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import { getOrderDetails } from '../redux/reducers/orderReducers';
+import { getOrderDetails, payOrder } from '../redux/reducers/orderReducers';
+import { actions } from '../redux/reducers/orderReducers';
 
 const OrderPage = () => {
   const dispatch = useDispatch();
@@ -13,9 +16,12 @@ const OrderPage = () => {
   const orderDetails = useSelector((state) => state.orderDetails);
   const { order, loading, error } = orderDetails;
 
+  const orderPay = useSelector((state) => state.orderPay);
+  const { loading: loadingPay, success: successPay } = orderPay;
+
   let itemsPrice = 0;
 
-  if (!loading) {
+  if (Object.keys(order).length !== 0) {
     //Calculate Prices
 
     const addDecimals = (num) => {
@@ -27,9 +33,24 @@ const OrderPage = () => {
     );
   }
 
+  const getPaymentCredientials = async () => {
+    const { data } = await axios.get('/api/config/googlepay');
+
+    const { gatewayMerchantId, merchantId } = data;
+
+    return { gatewayMerchantId, merchantId };
+  };
+
   useEffect(() => {
-    dispatch(getOrderDetails(id));
-  }, [dispatch, id]);
+    if (Object.keys(order).length === 0 || successPay) {
+      dispatch(actions.payOrderReset());
+      dispatch(getOrderDetails(id));
+    }
+  }, [dispatch, id, order, successPay]);
+
+  const successPaymentHandler = (paymentResult) => {
+    dispatch(payOrder({ id, paymentResult }));
+  };
 
   return loading ? (
     <Loader />
@@ -147,6 +168,64 @@ const OrderPage = () => {
                   <Col>${order.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
+
+              {!order.isPaid && (
+                <ListGroup.Item>
+                  {loadingPay ? (
+                    <Loader />
+                  ) : (
+                    <GooglePayButton
+                      environment='TEST'
+                      paymentRequest={{
+                        apiVersion: 2,
+                        apiVersionMinor: 0,
+                        allowedPaymentMethods: [
+                          {
+                            type: 'CARD',
+                            parameters: {
+                              allowedAuthMethods: [
+                                'PAN_ONLY',
+                                'CRYPTOGRAM_3DS',
+                              ],
+                              allowedCardNetworks: ['MASTERCARD', 'VISA'],
+                            },
+                            tokenizationSpecification: {
+                              type: 'PAYMENT_GATEWAY',
+                              parameters: {
+                                gateway: 'example',
+                                gatewayMerchantId: `${
+                                  getPaymentCredientials().gatewayMerchantId
+                                }`,
+                              },
+                            },
+                          },
+                        ],
+                        emailRequired: true,
+                        merchantInfo: {
+                          merchantId: `${getPaymentCredientials().merchantId}`,
+                          merchantName: 'Demo Merchant',
+                        },
+                        transactionInfo: {
+                          totalPriceStatus: 'FINAL',
+                          totalPriceLabel: 'Total',
+                          totalPrice: `${order.totalPrice}`,
+                          currencyCode: 'USD',
+                          countryCode: 'US',
+                        },
+                        callbackIntents: ['PAYMENT_AUTHORIZATION'],
+                      }}
+                      onPaymentAuthorized={(paymentData) => {
+                        successPaymentHandler({
+                          email: paymentData.email,
+                          transactionState: 'SUCCESS',
+                          paytime: new Date().toString(),
+                        });
+                        return { transactionState: 'SUCCESS' };
+                      }}
+                    />
+                  )}
+                </ListGroup.Item>
+              )}
             </ListGroup>
           </Card>
         </Col>

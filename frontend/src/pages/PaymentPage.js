@@ -16,7 +16,7 @@ const PaymentPage = () => {
     navigate('/shipping');
   }
 
-  const [paymentMethod, setPaymentMethod] = useState('PayPal');
+  const [paymentMethod, setPaymentMethod] = useState('GooglePay');
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -35,10 +35,10 @@ const PaymentPage = () => {
           <Col>
             <Form.Check
               type='radio'
-              label='PayPal or Credit Card'
-              id='PayPal'
+              label='Payments with Google Pay'
+              id='GooglePay'
               name='paymentMethod'
-              value='PayPal'
+              value='GooglePay'
               checked
               onChange={(e) => setPaymentMethod(e.target.value)}
             ></Form.Check>
