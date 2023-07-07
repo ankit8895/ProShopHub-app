@@ -132,6 +132,11 @@ const userDetailsSlice = createSlice({
     user: {},
     error: '',
   },
+  reducers: {
+    userDetailsReset: (state, action) => {
+      state.user = {};
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(getUserDetails.pending, (state) => {
       state.loading = true;
@@ -151,6 +156,7 @@ const userDetailsSlice = createSlice({
 });
 
 export const userDetailsReducer = userDetailsSlice.reducer;
+export const userDetailsActions = userDetailsSlice.actions;
 
 export const updateUserProfile = createAsyncThunk(
   'UpdateUserDetails',
