@@ -157,3 +157,49 @@ const orderPaySlice = createSlice({
 
 export const orderPayReducer = orderPaySlice.reducer;
 export const actions = orderPaySlice.actions;
+
+export const listMyOrders = createAsyncThunk(
+  'allOrders/listMyOrders',
+  async (arg, { getState }) => {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.get(`/api/orders/myorders`, config);
+
+    return data;
+  }
+);
+
+const orderListMySlice = createSlice({
+  name: 'orderListMy',
+  initialState: {
+    loading: false,
+    orders: [],
+    error: '',
+  },
+  extraReducers: (builder) => {
+    builder.addCase(listMyOrders.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(listMyOrders.fulfilled, (state, action) => {
+      state.loading = false;
+      state.orders = action.payload;
+    });
+    builder.addCase(listMyOrders.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
+});
+
+export const orderListMyReducer = orderListMySlice.reducer;
