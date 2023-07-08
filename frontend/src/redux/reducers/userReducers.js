@@ -206,3 +206,49 @@ const userUpdateProfileSlice = createSlice({
 });
 
 export const userUpdateProfileReducer = userUpdateProfileSlice.reducer;
+
+export const listUsers = createAsyncThunk(
+  'users/listUsers',
+  async (arg, { getState }) => {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.get(`/api/users`, config);
+
+    return data;
+  }
+);
+
+const userListSlice = createSlice({
+  name: 'userList',
+  initialState: {
+    loading: false,
+    users: [],
+    error: '',
+  },
+  extraReducers: (builder) => {
+    builder.addCase(listUsers.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(listUsers.fulfilled, (state, action) => {
+      state.loading = false;
+      state.users = action.payload;
+    });
+    builder.addCase(listUsers.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
+});
+
+export const userListReducer = userListSlice.reducer;
