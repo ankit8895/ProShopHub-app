@@ -258,3 +258,49 @@ const userListSlice = createSlice({
 
 export const userListReducer = userListSlice.reducer;
 export const userListActions = userListSlice.actions;
+
+export const deleteUser = createAsyncThunk(
+  'user/deleteUser',
+  async (id, { getState }) => {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.delete(`/api/users/${id}`, config);
+
+    return data;
+  }
+);
+
+const userDeleteSlice = createSlice({
+  name: 'userDelete',
+  initialState: {
+    loading: false,
+    success: false,
+    error: '',
+  },
+  extraReducers: (builder) => {
+    builder.addCase(deleteUser.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(deleteUser.fulfilled, (state, action) => {
+      state.loading = false;
+      state.success = true;
+    });
+    builder.addCase(deleteUser.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
+});
+
+export const userDeleteReducer = userDeleteSlice.reducer;

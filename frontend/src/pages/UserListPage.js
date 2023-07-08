@@ -5,7 +5,7 @@ import { LinkContainer } from 'react-router-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import { listUsers } from '../redux/reducers/userReducers';
+import { listUsers, deleteUser } from '../redux/reducers/userReducers';
 
 const UserListPage = () => {
   const dispatch = useDispatch();
@@ -17,15 +17,22 @@ const UserListPage = () => {
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
+  const userDelete = useSelector((state) => state.userDelete);
+  const { success: successDelete } = userDelete;
+
   useEffect(() => {
     if (userInfo && userInfo.isAdmin) {
       dispatch(listUsers());
     } else {
       navigate('/login');
     }
-  }, [dispatch, navigate, userInfo]);
+  }, [dispatch, navigate, userInfo, successDelete]);
 
-  const deleteHandler = (id) => {};
+  const deleteHandler = (id) => {
+    if (window.confirm('Are you sure')) {
+      dispatch(deleteUser(id));
+    }
+  };
 
   return (
     <>
