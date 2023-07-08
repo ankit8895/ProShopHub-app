@@ -233,6 +233,11 @@ const userListSlice = createSlice({
     users: [],
     error: '',
   },
+  reducers: {
+    userListReset: (state, action) => {
+      state.users = [];
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(listUsers.pending, (state) => {
       state.loading = true;
@@ -252,3 +257,4 @@ const userListSlice = createSlice({
 });
 
 export const userListReducer = userListSlice.reducer;
+export const userListActions = userListSlice.actions;
