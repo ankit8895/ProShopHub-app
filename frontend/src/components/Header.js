@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
-import { actions } from '../redux/reducers/userReducers';
+import { userLoginActions } from '../redux/reducers/userReducers';
 import { userDetailsActions } from '../redux/reducers/userReducers';
 import { orderListMyActions } from '../redux/reducers/orderReducers';
 
@@ -12,7 +12,7 @@ const Header = () => {
   const { userInfo } = userLogin;
 
   const logoutHandler = () => {
-    dispatch(actions.userLogout());
+    dispatch(userLoginActions.userLogout());
     dispatch(userDetailsActions.userDetailsReset());
     dispatch(orderListMyActions.orderListMyReset());
   };

@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import { getOrderDetails, payOrder } from '../redux/reducers/orderReducers';
-import { actions } from '../redux/reducers/orderReducers';
+import { orderPayActions } from '../redux/reducers/orderReducers';
 
 const OrderPage = () => {
   const dispatch = useDispatch();
@@ -43,7 +43,7 @@ const OrderPage = () => {
 
   useEffect(() => {
     if (Object.keys(order).length === 0 || successPay) {
-      dispatch(actions.payOrderReset());
+      dispatch(orderPayActions.payOrderReset());
       dispatch(getOrderDetails(id));
     }
   }, [dispatch, id, order, successPay]);

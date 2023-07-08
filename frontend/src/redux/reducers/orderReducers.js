@@ -156,7 +156,7 @@ const orderPaySlice = createSlice({
 });
 
 export const orderPayReducer = orderPaySlice.reducer;
-export const actions = orderPaySlice.actions;
+export const orderPayActions = orderPaySlice.actions;
 
 export const listMyOrders = createAsyncThunk(
   'allOrders/listMyOrders',

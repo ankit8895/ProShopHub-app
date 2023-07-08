@@ -53,7 +53,7 @@ const userLoginSlice = createSlice({
 });
 
 export const userLoginReducer = userLoginSlice.reducer;
-export const actions = userLoginSlice.actions;
+export const userLoginActions = userLoginSlice.actions;
 
 export const register = createAsyncThunk(
   'user/register',
