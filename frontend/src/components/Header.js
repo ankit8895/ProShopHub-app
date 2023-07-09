@@ -2,10 +2,13 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
-import { userLoginActions } from '../redux/reducers/userReducers';
-import { userDetailsActions } from '../redux/reducers/userReducers';
+import {
+  userLoginActions,
+  userDetailsActions,
+  userListActions,
+  userRegisterActions,
+} from '../redux/reducers/userReducers';
 import { orderListMyActions } from '../redux/reducers/orderReducers';
-import { userListActions } from '../redux/reducers/userReducers';
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -17,6 +20,7 @@ const Header = () => {
     dispatch(userDetailsActions.userDetailsReset());
     dispatch(orderListMyActions.orderListMyReset());
     dispatch(userListActions.userListReset());
+    dispatch(userRegisterActions.userRegisterReset());
   };
   return (
     <header>

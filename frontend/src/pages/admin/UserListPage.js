@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Table } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
-import Message from '../components/Message';
-import Loader from '../components/Loader';
-import { listUsers, deleteUser } from '../redux/reducers/userReducers';
+import Message from '../../components/Message';
+import Loader from '../../components/Loader';
+import { listUsers, deleteUser } from '../../redux/reducers/userReducers';
 
 const UserListPage = () => {
   const dispatch = useDispatch();
@@ -19,6 +19,10 @@ const UserListPage = () => {
 
   const userDelete = useSelector((state) => state.userDelete);
   const { success: successDelete } = userDelete;
+
+  console.log('USER DELETE', userDelete);
+
+  console.log('USER LIST', userList);
 
   useEffect(() => {
     if (userInfo && userInfo.isAdmin) {

@@ -29,7 +29,9 @@ const userLoginSlice = createSlice({
   },
   reducers: {
     userLogout: (state, action) => {
+      state.loading = false;
       state.userInfo = null;
+      state.error = '';
       localStorage.removeItem('userInfo');
     },
   },
@@ -85,6 +87,13 @@ const userRegisterSlice = createSlice({
     userInfo: null,
     error: '',
   },
+  reducers: {
+    userRegisterReset: (state, action) => {
+      state.loading = false;
+      state.userInfo = null;
+      state.error = '';
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(register.pending, (state) => {
       state.loading = true;
@@ -104,6 +113,7 @@ const userRegisterSlice = createSlice({
 });
 
 export const userRegisterReducer = userRegisterSlice.reducer;
+export const userRegisterActions = userRegisterSlice.actions;
 
 export const getUserDetails = createAsyncThunk(
   'getUserDetails',
@@ -134,7 +144,9 @@ const userDetailsSlice = createSlice({
   },
   reducers: {
     userDetailsReset: (state, action) => {
+      state.loading = false;
       state.user = {};
+      state.error = '';
     },
   },
   extraReducers: (builder) => {
@@ -235,7 +247,9 @@ const userListSlice = createSlice({
   },
   reducers: {
     userListReset: (state, action) => {
+      state.loading = false;
       state.users = [];
+      state.error = '';
     },
   },
   extraReducers: (builder) => {
@@ -261,7 +275,7 @@ export const userListActions = userListSlice.actions;
 
 export const deleteUser = createAsyncThunk(
   'user/deleteUser',
-  async (id, { getState }) => {
+  async (id, { getState, dispatch }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -273,6 +287,8 @@ export const deleteUser = createAsyncThunk(
     };
 
     const { data } = await axios.delete(`/api/users/${id}`, config);
+
+    dispatch(listUsers());
 
     return data;
   }
@@ -304,3 +320,61 @@ const userDeleteSlice = createSlice({
 });
 
 export const userDeleteReducer = userDeleteSlice.reducer;
+
+export const updateUser = createAsyncThunk(
+  'user/updateUser',
+  async (user, { getState, dispatch }) => {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.put(`/api/users/${user._id}`, user, config);
+
+    dispatch(getUserDetails(data._id));
+
+    return data;
+  }
+);
+
+const userUpdateSlice = createSlice({
+  name: 'userUpdate',
+  initialState: {
+    loading: false,
+    user: {},
+    success: false,
+    error: '',
+  },
+  reducers: {
+    userUpdateReset: (state, action) => {
+      state.loading = false;
+      state.user = {};
+      state.success = false;
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(updateUser.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(updateUser.fulfilled, (state, action) => {
+      state.loading = false;
+      state.success = true;
+    });
+    builder.addCase(updateUser.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
+});
+
+export const userUpdateReducer = userUpdateSlice.reducer;
+export const userUpdateActions = userUpdateSlice.actions;
