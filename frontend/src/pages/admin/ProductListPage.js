@@ -5,7 +5,10 @@ import { LinkContainer } from 'react-router-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
-import { listProducts } from '../../redux/reducers/productReducers';
+import {
+  listProducts,
+  deleteProduct,
+} from '../../redux/reducers/productReducers';
 
 const ProductListPage = () => {
   const dispatch = useDispatch();
@@ -14,6 +17,13 @@ const ProductListPage = () => {
 
   const productList = useSelector((state) => state.productList);
   const { loading, error, products } = productList;
+
+  const productDelete = useSelector((state) => state.productDelete);
+  const {
+    loading: loadingDelete,
+    error: errorDelete,
+    success: successDelete,
+  } = productDelete;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -24,11 +34,11 @@ const ProductListPage = () => {
     } else {
       navigate('/login');
     }
-  }, [dispatch, navigate, userInfo]);
+  }, [dispatch, navigate, userInfo, successDelete]);
 
   const deleteHandler = (id) => {
     if (window.confirm('Are you sure')) {
-      //DELETE PRODUCTS
+      dispatch(deleteProduct(id));
     }
   };
 
@@ -48,7 +58,8 @@ const ProductListPage = () => {
           </Button>
         </Col>
       </Row>
-
+      {loadingDelete && <Loader />}
+      {errorDelete && <Message variant='danger'>{errorDelete}</Message>}
       {loading ? (
         <Loader />
       ) : error ? (

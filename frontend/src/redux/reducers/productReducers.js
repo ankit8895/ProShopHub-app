@@ -74,3 +74,51 @@ const productDetailsSlice = createSlice({
 });
 
 export const productDetailsReducer = productDetailsSlice.reducer;
+
+export const deleteProduct = createAsyncThunk(
+  'allOrders/listMyOrders',
+  async (id, { getState, dispatch }) => {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.delete(`/api/products/${id}`, config);
+
+    dispatch(listProducts());
+
+    return data;
+  }
+);
+
+const productDeleteSlice = createSlice({
+  name: 'productDelete',
+  initialState: {
+    loading: false,
+    success: false,
+    error: '',
+  },
+  extraReducers: (builder) => {
+    builder.addCase(deleteProduct.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(deleteProduct.fulfilled, (state, action) => {
+      state.loading = false;
+      state.success = true;
+    });
+    builder.addCase(deleteProduct.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
+});
+
+export const productDeleteReducer = productDeleteSlice.reducer;
