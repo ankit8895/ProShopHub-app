@@ -179,3 +179,65 @@ const productCreateSlice = createSlice({
 
 export const productCreateReducer = productCreateSlice.reducer;
 export const productCreateActions = productCreateSlice.actions;
+
+export const updateProduct = createAsyncThunk(
+  'product/updateProduct',
+  async (product, { getState }) => {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.put(
+      `/api/products/${product._id}`,
+      product,
+      config
+    );
+
+    return data;
+  }
+);
+
+const productUpdateSlice = createSlice({
+  name: 'productUpdate',
+  initialState: {
+    loading: false,
+    product: {},
+    success: false,
+    error: '',
+  },
+  reducers: {
+    productUpdateReset: (state, action) => {
+      state.loading = false;
+      state.product = {};
+      state.success = false;
+      state.error = '';
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(updateProduct.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(updateProduct.fulfilled, (state, action) => {
+      state.loading = false;
+      state.product = action.payload;
+      state.success = true;
+    });
+    builder.addCase(updateProduct.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
+});
+
+export const productUpdateReducer = productUpdateSlice.reducer;
+export const productUpdateActions = productUpdateSlice.actions;
