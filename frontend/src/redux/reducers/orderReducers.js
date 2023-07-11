@@ -209,3 +209,49 @@ const orderListMySlice = createSlice({
 
 export const orderListMyReducer = orderListMySlice.reducer;
 export const orderListMyActions = orderListMySlice.actions;
+
+export const listOrders = createAsyncThunk(
+  'allOrders/listOrders',
+  async (arg, { getState }) => {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.get(`/api/orders`, config);
+
+    return data;
+  }
+);
+
+const orderListSlice = createSlice({
+  name: 'orderList',
+  initialState: {
+    loading: false,
+    orders: [],
+    error: '',
+  },
+  extraReducers: (builder) => {
+    builder.addCase(listOrders.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(listOrders.fulfilled, (state, action) => {
+      state.loading = false;
+      state.orders = action.payload;
+    });
+    builder.addCase(listOrders.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
+});
+
+export const orderListReducer = orderListSlice.reducer;
