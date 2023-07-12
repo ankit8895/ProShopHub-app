@@ -1,16 +1,24 @@
 import React, { useEffect } from 'react';
 import axios from 'axios';
 import GooglePayButton from '@google-pay/button-react';
-import { Link, useParams } from 'react-router-dom';
-import { Row, Col, ListGroup, Image, Card } from 'react-bootstrap';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Row, Col, ListGroup, Image, Card, Button } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
-import { getOrderDetails, payOrder } from '../redux/reducers/orderReducers';
-import { orderPayActions } from '../redux/reducers/orderReducers';
+import {
+  getOrderDetails,
+  payOrder,
+  deliverOrder,
+} from '../redux/reducers/orderReducers';
+import {
+  orderPayActions,
+  orderDeliverActions,
+} from '../redux/reducers/orderReducers';
 
 const OrderPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { id } = useParams();
 
   const orderDetails = useSelector((state) => state.orderDetails);
@@ -18,6 +26,12 @@ const OrderPage = () => {
 
   const orderPay = useSelector((state) => state.orderPay);
   const { loading: loadingPay, success: successPay } = orderPay;
+
+  const orderDeliver = useSelector((state) => state.orderDeliver);
+  const { loading: loadingDeliver, success: successDeliver } = orderDeliver;
+
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
 
   let itemsPrice = 0;
 
@@ -42,14 +56,22 @@ const OrderPage = () => {
   };
 
   useEffect(() => {
-    if (Object.keys(order).length === 0 || successPay) {
+    if (!userInfo) {
+      navigate('/login');
+    }
+    if (Object.keys(order).length === 0 || successPay || successDeliver) {
       dispatch(orderPayActions.payOrderReset());
+      dispatch(orderDeliverActions.orderDeliverReset());
       dispatch(getOrderDetails(id));
     }
-  }, [dispatch, id, order, successPay]);
+  }, [dispatch, id, order, successPay, successDeliver, userInfo, navigate]);
 
   const successPaymentHandler = (paymentResult) => {
     dispatch(payOrder({ id, paymentResult }));
+  };
+
+  const deliverHandler = () => {
+    dispatch(deliverOrder(order));
   };
 
   return loading ? (
@@ -226,6 +248,21 @@ const OrderPage = () => {
                   )}
                 </ListGroup.Item>
               )}
+              {loadingDeliver && <Loader />}
+              {userInfo &&
+                userInfo.isAdmin &&
+                order.isPaid &&
+                !order.isDelivered && (
+                  <ListGroup.Item>
+                    <Button
+                      type='button'
+                      className='btn btn-block'
+                      onClick={deliverHandler}
+                    >
+                      Mark As Delivered
+                    </Button>
+                  </ListGroup.Item>
+                )}
             </ListGroup>
           </Card>
         </Col>

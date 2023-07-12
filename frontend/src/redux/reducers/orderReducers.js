@@ -76,6 +76,13 @@ const orderDetailsSlice = createSlice({
     order: {},
     error: '',
   },
+  reducers: {
+    orderDetailsReset: (state, action) => {
+      state.loading = true;
+      state.order = {};
+      state.error = '';
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(getOrderDetails.pending, (state) => {
       state.loading = true;
@@ -95,6 +102,7 @@ const orderDetailsSlice = createSlice({
 });
 
 export const orderDetailsReducer = orderDetailsSlice.reducer;
+export const orderDetailsActions = orderDetailsSlice.actions;
 
 export const payOrder = createAsyncThunk(
   'order/payOrder',
@@ -157,6 +165,64 @@ const orderPaySlice = createSlice({
 
 export const orderPayReducer = orderPaySlice.reducer;
 export const orderPayActions = orderPaySlice.actions;
+
+export const deliverOrder = createAsyncThunk(
+  'order/deliverOrder',
+  async (order, { getState }) => {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+
+    const { data } = await axios.put(
+      `/api/orders/${order._id}/deliver`,
+      {},
+      config
+    );
+
+    return data;
+  }
+);
+
+const orderDeliverSlice = createSlice({
+  name: 'orderDeliver',
+  initialState: {
+    loading: false,
+    success: false,
+    error: '',
+  },
+  reducers: {
+    orderDeliverReset: (state, action) => {
+      state.loading = false;
+      state.success = false;
+      state.error = '';
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(deliverOrder.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(deliverOrder.fulfilled, (state, action) => {
+      state.loading = false;
+      state.success = true;
+    });
+    builder.addCase(deliverOrder.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
+});
+
+export const orderDeliverReducer = orderDeliverSlice.reducer;
+export const orderDeliverActions = orderDeliverSlice.actions;
 
 export const listMyOrders = createAsyncThunk(
   'allOrders/listMyOrders',

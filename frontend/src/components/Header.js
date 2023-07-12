@@ -8,7 +8,10 @@ import {
   userListActions,
   userRegisterActions,
 } from '../redux/reducers/userReducers';
-import { orderListMyActions } from '../redux/reducers/orderReducers';
+import {
+  orderListMyActions,
+  orderDetailsActions,
+} from '../redux/reducers/orderReducers';
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -18,9 +21,10 @@ const Header = () => {
   const logoutHandler = () => {
     dispatch(userLoginActions.userLogout());
     dispatch(userDetailsActions.userDetailsReset());
-    dispatch(orderListMyActions.orderListMyReset());
     dispatch(userListActions.userListReset());
     dispatch(userRegisterActions.userRegisterReset());
+    dispatch(orderListMyActions.orderListMyReset());
+    dispatch(orderDetailsActions.orderDetailsReset());
   };
   return (
     <header>
