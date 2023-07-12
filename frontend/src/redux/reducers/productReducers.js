@@ -3,8 +3,11 @@ import axios from 'axios';
 
 export const listProducts = createAsyncThunk(
   'products/listProducts',
-  async (keyword = '') => {
-    const { data } = await axios.get(`/api/products?keyword=${keyword}`);
+  async (allProductsInfo) => {
+    const { keyword = '', pageNumber = '' } = allProductsInfo;
+    const { data } = await axios.get(
+      `/api/products?keyword=${keyword}&pageNumber=${pageNumber}`
+    );
 
     return data;
   }
@@ -14,6 +17,8 @@ const productListSlice = createSlice({
   name: 'productList',
   initialState: {
     products: [],
+    page: 1,
+    pages: 1,
     loading: false,
     error: '',
   },
@@ -22,8 +27,11 @@ const productListSlice = createSlice({
       state.loading = true;
     });
     builder.addCase(listProducts.fulfilled, (state, action) => {
+      const { products, pages, page } = action.payload;
       state.loading = false;
-      state.products = action.payload;
+      state.products = products;
+      state.page = page;
+      state.pages = pages;
     });
     builder.addCase(listProducts.rejected, (state, action) => {
       state.loading = false;
