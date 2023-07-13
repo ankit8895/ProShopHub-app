@@ -309,3 +309,39 @@ const productReviewCreateSlice = createSlice({
 
 export const productReviewCreateReducer = productReviewCreateSlice.reducer;
 export const productReviewCreateActions = productReviewCreateSlice.actions;
+
+export const listTopProducts = createAsyncThunk(
+  'products/listTopProducts',
+  async () => {
+    const { data } = await axios.get(`/api/products/top`);
+
+    return data;
+  }
+);
+
+const productTopRatedSlice = createSlice({
+  name: 'productTopRated',
+  initialState: {
+    loading: false,
+    products: [],
+    error: '',
+  },
+  extraReducers: (builder) => {
+    builder.addCase(listTopProducts.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(listTopProducts.fulfilled, (state, action) => {
+      state.loading = false;
+      state.products = action.payload;
+    });
+    builder.addCase(listTopProducts.rejected, (state, action) => {
+      state.loading = false;
+      state.error =
+        action.error.response && action.error.response.data.message
+          ? action.error.response.data.message
+          : action.error.message;
+    });
+  },
+});
+
+export const productTopRatedReducer = productTopRatedSlice.reducer;

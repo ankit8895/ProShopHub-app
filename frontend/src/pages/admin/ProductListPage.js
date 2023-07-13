@@ -40,7 +40,6 @@ const ProductListPage = () => {
   const { userInfo } = userLogin;
 
   useEffect(() => {
-    // dispatch(productCreateActions.productCreateReset());
     if (!userInfo.isAdmin) {
       navigate('/login');
     }
