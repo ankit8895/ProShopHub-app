@@ -33,16 +33,25 @@ const Header = () => {
       <Navbar bg='dark' variant='dark' expand='lg' collapseOnSelect>
         <Container>
           <LinkContainer to='/'>
-            <Navbar.Brand>ProShop</Navbar.Brand>
+            <Navbar.Brand>
+              <img
+                src='https://cdn-icons-png.flaticon.com/128/5555/5555081.png'
+                width='50'
+                height='50'
+                className='d-inline-block'
+                alt='app-logo'
+              />
+              ProShop
+            </Navbar.Brand>
           </LinkContainer>
 
           <Navbar.Toggle aria-controls='basic-navbar-nav' />
           <Navbar.Collapse id='basic-navbar-nav'>
-            <SearchBox />
             <Nav className='ms-auto'>
+              <SearchBox />
               <LinkContainer to='/cart'>
                 <Nav.Link>
-                  <i className='fa-solid fa-cart-shopping'></i>Cart
+                  <i className='fa-solid fa-cart-shopping'></i> Cart
                 </Nav.Link>
               </LinkContainer>
               {userInfo ? (
@@ -57,7 +66,7 @@ const Header = () => {
               ) : (
                 <LinkContainer to='/login'>
                   <Nav.Link>
-                    <i className='fa-solid fa-user'></i>Sign In
+                    <i className='fa-solid fa-user'></i> Sign In
                   </Nav.Link>
                 </LinkContainer>
               )}
