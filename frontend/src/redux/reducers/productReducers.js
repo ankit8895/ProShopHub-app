@@ -3,13 +3,22 @@ import axios from 'axios';
 
 export const listProducts = createAsyncThunk(
   'products/listProducts',
-  async (allProductsInfo) => {
+  async (allProductsInfo, { rejectWithValue, fulfillWithValue }) => {
     const { keyword = '', pageNumber = '' } = allProductsInfo;
-    const { data } = await axios.get(
-      `/api/products?keyword=${keyword}&pageNumber=${pageNumber}`
-    );
 
-    return data;
+    try {
+      const { data } = await axios.get(
+        `/api/products?keyword=${keyword}&pageNumber=${pageNumber}`
+      );
+
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -35,10 +44,7 @@ const productListSlice = createSlice({
     });
     builder.addCase(listProducts.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -47,10 +53,18 @@ export const productListReducer = productListSlice.reducer;
 
 export const listProductDetails = createAsyncThunk(
   'product/listProductDetails',
-  async (id) => {
-    return await axios
-      .get(`/api/products/${id}`)
-      .then((response) => response.data);
+  async (id, { rejectWithValue, fulfillWithValue }) => {
+    try {
+      const { data } = await axios.get(`/api/products/${id}`);
+
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -73,10 +87,7 @@ const productDetailsSlice = createSlice({
     });
     builder.addCase(listProductDetails, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -85,7 +96,7 @@ export const productDetailsReducer = productDetailsSlice.reducer;
 
 export const deleteProduct = createAsyncThunk(
   'product/deleteProduct',
-  async (id, { getState, dispatch }) => {
+  async (id, { getState, dispatch, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -96,11 +107,19 @@ export const deleteProduct = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.delete(`/api/products/${id}`, config);
+    try {
+      const { data } = await axios.delete(`/api/products/${id}`, config);
 
-    dispatch(listProducts());
+      dispatch(listProducts());
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -121,10 +140,7 @@ const productDeleteSlice = createSlice({
     });
     builder.addCase(deleteProduct.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -133,7 +149,7 @@ export const productDeleteReducer = productDeleteSlice.reducer;
 
 export const createProduct = createAsyncThunk(
   'product/createProduct',
-  async (arg, { getState }) => {
+  async (arg, { getState, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -144,9 +160,17 @@ export const createProduct = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.post(`/api/products`, {}, config);
+    try {
+      const { data } = await axios.post(`/api/products`, {}, config);
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -177,10 +201,7 @@ const productCreateSlice = createSlice({
     });
     builder.addCase(createProduct.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -190,7 +211,7 @@ export const productCreateActions = productCreateSlice.actions;
 
 export const updateProduct = createAsyncThunk(
   'product/updateProduct',
-  async (product, { getState }) => {
+  async (product, { getState, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -202,13 +223,21 @@ export const updateProduct = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.put(
-      `/api/products/${product._id}`,
-      product,
-      config
-    );
+    try {
+      const { data } = await axios.put(
+        `/api/products/${product._id}`,
+        product,
+        config
+      );
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -239,10 +268,7 @@ const productUpdateSlice = createSlice({
     });
     builder.addCase(updateProduct.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -252,7 +278,7 @@ export const productUpdateActions = productUpdateSlice.actions;
 
 export const createProductReview = createAsyncThunk(
   'product/createProductReview',
-  async (productInfo, { getState }) => {
+  async (productInfo, { getState, rejectWithValue, fulfillWithValue }) => {
     const { id: productId, review } = productInfo;
     const {
       userLogin: { userInfo },
@@ -265,13 +291,21 @@ export const createProductReview = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.post(
-      `/api/products/${productId}/reviews`,
-      review,
-      config
-    );
+    try {
+      const { data } = await axios.post(
+        `/api/products/${productId}/reviews`,
+        review,
+        config
+      );
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -299,10 +333,7 @@ const productReviewCreateSlice = createSlice({
     });
     builder.addCase(createProductReview.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -312,10 +343,18 @@ export const productReviewCreateActions = productReviewCreateSlice.actions;
 
 export const listTopProducts = createAsyncThunk(
   'products/listTopProducts',
-  async () => {
-    const { data } = await axios.get(`/api/products/top`);
+  async (arg, { rejectWithValue, fulfillWithValue }) => {
+    try {
+      const { data } = await axios.get(`/api/products/top`);
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -336,10 +375,7 @@ const productTopRatedSlice = createSlice({
     });
     builder.addCase(listTopProducts.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });

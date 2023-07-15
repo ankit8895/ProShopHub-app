@@ -2,23 +2,34 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 import axios from 'axios';
 
-export const login = createAsyncThunk('user/login', async (userData) => {
-  const { email, password } = userData;
+export const login = createAsyncThunk(
+  'user/login',
+  async (userData, { rejectWithValue, fulfillWithValue }) => {
+    const { email, password } = userData;
 
-  const config = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  };
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
 
-  const { data } = await axios.post(
-    '/api/users/login',
-    { email, password },
-    config
-  );
+    try {
+      const { data } = await axios.post(
+        '/api/users/login',
+        { email, password },
+        config
+      );
 
-  return data;
-});
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
+  }
+);
 
 const userLoginSlice = createSlice({
   name: 'userLogin',
@@ -46,10 +57,7 @@ const userLoginSlice = createSlice({
     });
     builder.addCase(login.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -59,7 +67,7 @@ export const userLoginActions = userLoginSlice.actions;
 
 export const register = createAsyncThunk(
   'user/register',
-  async (userData, { dispatch }) => {
+  async (userData, { dispatch, rejectWithValue, fulfillWithValue }) => {
     const { name, email, password } = userData;
 
     const config = {
@@ -68,15 +76,23 @@ export const register = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.post(
-      '/api/users',
-      { name, email, password },
-      config
-    );
+    try {
+      const { data } = await axios.post(
+        '/api/users',
+        { name, email, password },
+        config
+      );
 
-    dispatch(login({ email, password }));
+      dispatch(login({ email, password }));
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -104,10 +120,7 @@ const userRegisterSlice = createSlice({
     });
     builder.addCase(register.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -117,7 +130,7 @@ export const userRegisterActions = userRegisterSlice.actions;
 
 export const getUserDetails = createAsyncThunk(
   'getUserDetails',
-  async (id, { getState }) => {
+  async (id, { getState, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -129,9 +142,17 @@ export const getUserDetails = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.get(`/api/users/${id}`, config);
+    try {
+      const { data } = await axios.get(`/api/users/${id}`, config);
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -159,10 +180,7 @@ const userDetailsSlice = createSlice({
     });
     builder.addCase(getUserDetails.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -172,7 +190,7 @@ export const userDetailsActions = userDetailsSlice.actions;
 
 export const updateUserProfile = createAsyncThunk(
   'UpdateUserDetails',
-  async (user, { getState }) => {
+  async (user, { getState, dispatch, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -184,9 +202,20 @@ export const updateUserProfile = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.put(`/api/users/profile`, user, config);
+    try {
+      const { data } = await axios.put(`/api/users/profile`, user, config);
 
-    return data;
+      dispatch(login.fulfilled(data));
+
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -197,6 +226,14 @@ const userUpdateProfileSlice = createSlice({
     userInfo: {},
     error: '',
     success: false,
+  },
+  reducers: {
+    userUpdateProfileReset: (state, action) => {
+      state.loading = false;
+      state.userInfo = {};
+      state.error = '';
+      state.success = false;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(updateUserProfile.pending, (state) => {
@@ -209,19 +246,17 @@ const userUpdateProfileSlice = createSlice({
     });
     builder.addCase(updateUserProfile.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
 
 export const userUpdateProfileReducer = userUpdateProfileSlice.reducer;
+export const userUpdateProfileActions = userUpdateProfileSlice.actions;
 
 export const listUsers = createAsyncThunk(
   'users/listUsers',
-  async (arg, { getState }) => {
+  async (arg, { getState, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -232,9 +267,17 @@ export const listUsers = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.get(`/api/users`, config);
+    try {
+      const { data } = await axios.get(`/api/users`, config);
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -262,10 +305,7 @@ const userListSlice = createSlice({
     });
     builder.addCase(listUsers.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -275,7 +315,7 @@ export const userListActions = userListSlice.actions;
 
 export const deleteUser = createAsyncThunk(
   'user/deleteUser',
-  async (id, { getState, dispatch }) => {
+  async (id, { getState, dispatch, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -286,11 +326,19 @@ export const deleteUser = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.delete(`/api/users/${id}`, config);
+    try {
+      const { data } = await axios.delete(`/api/users/${id}`, config);
 
-    dispatch(listUsers());
+      dispatch(listUsers());
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -311,10 +359,7 @@ const userDeleteSlice = createSlice({
     });
     builder.addCase(deleteUser.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -323,7 +368,7 @@ export const userDeleteReducer = userDeleteSlice.reducer;
 
 export const updateUser = createAsyncThunk(
   'user/updateUser',
-  async (user, { getState, dispatch }) => {
+  async (user, { getState, dispatch, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -335,11 +380,19 @@ export const updateUser = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.put(`/api/users/${user._id}`, user, config);
+    try {
+      const { data } = await axios.put(`/api/users/${user._id}`, user, config);
 
-    dispatch(getUserDetails(data._id));
+      dispatch(getUserDetails(data._id));
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -368,10 +421,7 @@ const userUpdateSlice = createSlice({
     });
     builder.addCase(updateUser.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });

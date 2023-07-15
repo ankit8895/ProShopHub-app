@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const createOrder = createAsyncThunk(
   'order/createOrder',
-  async (order, { getState }) => {
+  async (order, { getState, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -15,9 +15,17 @@ export const createOrder = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.post(`/api/orders`, order, config);
+    try {
+      const { data } = await axios.post(`/api/orders`, order, config);
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -40,10 +48,7 @@ const orderCreateSlice = createSlice({
     });
     builder.addCase(createOrder, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -52,7 +57,7 @@ export const orderCreateReducer = orderCreateSlice.reducer;
 
 export const getOrderDetails = createAsyncThunk(
   'order/orderDetails',
-  async (id, { getState }) => {
+  async (id, { getState, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -63,9 +68,17 @@ export const getOrderDetails = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.get(`/api/orders/${id}`, config);
+    try {
+      const { data } = await axios.get(`/api/orders/${id}`, config);
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -93,10 +106,7 @@ const orderDetailsSlice = createSlice({
     });
     builder.addCase(getOrderDetails.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -106,7 +116,7 @@ export const orderDetailsActions = orderDetailsSlice.actions;
 
 export const payOrder = createAsyncThunk(
   'order/payOrder',
-  async (orderInfo, { getState }) => {
+  async (orderInfo, { getState, rejectWithValue, fulfillWithValue }) => {
     const { id, paymentResult } = orderInfo;
     const {
       userLogin: { userInfo },
@@ -119,13 +129,21 @@ export const payOrder = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.put(
-      `/api/orders/${id}/pay`,
-      paymentResult,
-      config
-    );
+    try {
+      const { data } = await axios.put(
+        `/api/orders/${id}/pay`,
+        paymentResult,
+        config
+      );
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -155,10 +173,7 @@ const orderPaySlice = createSlice({
     builder.addCase(payOrder.rejected, (state, action) => {
       state.loading = false;
       state.success = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -168,7 +183,7 @@ export const orderPayActions = orderPaySlice.actions;
 
 export const deliverOrder = createAsyncThunk(
   'order/deliverOrder',
-  async (order, { getState }) => {
+  async (order, { getState, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -179,13 +194,21 @@ export const deliverOrder = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.put(
-      `/api/orders/${order._id}/deliver`,
-      {},
-      config
-    );
+    try {
+      const { data } = await axios.put(
+        `/api/orders/${order._id}/deliver`,
+        {},
+        config
+      );
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -213,10 +236,7 @@ const orderDeliverSlice = createSlice({
     });
     builder.addCase(deliverOrder.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -226,7 +246,7 @@ export const orderDeliverActions = orderDeliverSlice.actions;
 
 export const listMyOrders = createAsyncThunk(
   'allOrders/listMyOrders',
-  async (arg, { getState }) => {
+  async (arg, { getState, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -237,9 +257,17 @@ export const listMyOrders = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.get(`/api/orders/myorders`, config);
+    try {
+      const { data } = await axios.get(`/api/orders/myorders`, config);
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -265,10 +293,7 @@ const orderListMySlice = createSlice({
     });
     builder.addCase(listMyOrders.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });
@@ -278,7 +303,7 @@ export const orderListMyActions = orderListMySlice.actions;
 
 export const listOrders = createAsyncThunk(
   'allOrders/listOrders',
-  async (arg, { getState }) => {
+  async (arg, { getState, rejectWithValue, fulfillWithValue }) => {
     const {
       userLogin: { userInfo },
     } = getState();
@@ -289,9 +314,17 @@ export const listOrders = createAsyncThunk(
       },
     };
 
-    const { data } = await axios.get(`/api/orders`, config);
+    try {
+      const { data } = await axios.get(`/api/orders`, config);
 
-    return data;
+      return fulfillWithValue(data);
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -312,10 +345,7 @@ const orderListSlice = createSlice({
     });
     builder.addCase(listOrders.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });

@@ -46,7 +46,7 @@ const RegisterPage = () => {
       {error && <Message variant='danger'>{error}</Message>}
       {loading && <Loader />}
       <Form onSubmit={submitHandler}>
-        <Form.Group controlId='name'>
+        <Form.Group className='mb-3' controlId='name'>
           <Form.Label>Name</Form.Label>
           <Form.Control
             type='name'
@@ -56,7 +56,7 @@ const RegisterPage = () => {
           ></Form.Control>
         </Form.Group>
 
-        <Form.Group controlId='email'>
+        <Form.Group className='mb-3' controlId='email'>
           <Form.Label>Email Address</Form.Label>
           <Form.Control
             type='email'
@@ -66,7 +66,7 @@ const RegisterPage = () => {
           ></Form.Control>
         </Form.Group>
 
-        <Form.Group controlId='password'>
+        <Form.Group className='mb-3' controlId='password'>
           <Form.Label>Password</Form.Label>
           <Form.Control
             type='password'
@@ -76,7 +76,7 @@ const RegisterPage = () => {
           ></Form.Control>
         </Form.Group>
 
-        <Form.Group controlId='confirmPassword'>
+        <Form.Group className='mb-3' controlId='confirmPassword'>
           <Form.Label>Confirm Password</Form.Label>
           <Form.Control
             type='password'

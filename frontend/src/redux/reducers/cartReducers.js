@@ -3,24 +3,32 @@ import axios from 'axios';
 
 export const addToCart = createAsyncThunk(
   'addToCart',
-  async (productData, { getState }) => {
+  async (productData, { getState, rejectWithValue, fulfillWithValue }) => {
     const { id, qty } = productData;
-    const response = await axios.get(`/api/products/${id}`);
-    const data = response.data;
 
-    localStorage.setItem(
-      'cartItems',
-      JSON.stringify(getState().cart.cartItems)
-    );
+    try {
+      const { data } = await axios.get(`/api/products/${id}`);
 
-    return {
-      product: data._id,
-      name: data.name,
-      image: data.image,
-      price: data.price,
-      countInStock: data.countInStock,
-      qty,
-    };
+      localStorage.setItem(
+        'cartItems',
+        JSON.stringify(getState().cart.cartItems)
+      );
+
+      return fulfillWithValue({
+        product: data._id,
+        name: data.name,
+        image: data.image,
+        price: data.price,
+        countInStock: data.countInStock,
+        qty,
+      });
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        throw rejectWithValue(error.response.data.message);
+      } else {
+        throw rejectWithValue(error.message);
+      }
+    }
   }
 );
 
@@ -68,10 +76,7 @@ const cartSlice = createSlice({
     });
     builder.addCase(addToCart.rejected, (state, action) => {
       state.loading = false;
-      state.error =
-        action.error.response && action.error.response.data.message
-          ? action.error.response.data.message
-          : action.error.message;
+      state.error = action.payload ? action.payload : action.error.message;
     });
   },
 });

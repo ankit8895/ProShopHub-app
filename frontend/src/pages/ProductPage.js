@@ -44,8 +44,8 @@ const ProductPage = () => {
       alert('Review Submitted!');
       setRating(0);
       setComment('');
-      dispatch(productReviewCreateActions.productCreateReviewReset());
     }
+    dispatch(productReviewCreateActions.productCreateReviewReset());
     dispatch(listProductDetails(id));
   }, [dispatch, id, successProductReview]);
 
@@ -78,7 +78,7 @@ const ProductPage = () => {
       ) : (
         <>
           <Meta title={product.name} />
-          <Row>
+          <Row className='mb-3'>
             <Col md={6}>
               <Image src={product.image} alt={product.name} fluid />
             </Col>
@@ -178,7 +178,7 @@ const ProductPage = () => {
                   )}
                   {userInfo ? (
                     <Form onSubmit={submitHandler}>
-                      <Form.Group controlId='rating'>
+                      <Form.Group className='mb-3' controlId='rating'>
                         <Form.Label>Rating</Form.Label>
                         <Form.Control
                           as='select'
@@ -193,7 +193,7 @@ const ProductPage = () => {
                           <option value='5'>5 - Excellent</option>
                         </Form.Control>
                       </Form.Group>
-                      <Form.Group controlId='comment'>
+                      <Form.Group className='mb-3' controlId='comment'>
                         <Form.Label>Comment</Form.Label>
                         <Form.Control
                           as='textarea'
@@ -208,7 +208,7 @@ const ProductPage = () => {
                     </Form>
                   ) : (
                     <Message>
-                      Please <Link to='/login'>sign in</Link>to write a review
+                      Please <Link to='/login'>sign in</Link> to write a review
                     </Message>
                   )}
                 </ListGroup.Item>
