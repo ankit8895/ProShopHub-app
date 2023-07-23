@@ -1,5 +1,6 @@
 # ProShopHub E-Commerce Platform
 http://proshophub.us.to/
+
 eCommerce platform built with the MERN stack & Redux.
 
 Welcome to our state-of-the-art eCommerce web application powered by the MERN (MongoDB, Express, React, Node.js) stack! This platform has been meticulously designed to provide you with a seamless and delightful shopping experience. Let's explore the exciting features that make our online store stand out:
